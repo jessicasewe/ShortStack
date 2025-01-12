@@ -122,7 +122,7 @@ export default function Hero() {
             size="lg"
             className="bg-[#a24b33] hover:bg-[#a24b33]/90 text-white px-8 py-6 text-lg rounded-full"
           >
-            Get started for free
+            Get started
           </Button>
         </motion.div>
       </div>
