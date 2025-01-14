@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation"; // Import useRouter
 import { Check } from "lucide-react";
 import { Button } from "@/components/button";
 import {
@@ -12,6 +13,7 @@ import {
 
 export default function PricingPlans() {
   const [isAnnual, setIsAnnual] = useState(false);
+  const router = useRouter(); // Initialize router
 
   const plans = [
     {
@@ -67,7 +69,6 @@ export default function PricingPlans() {
             Monthly
           </span>
 
-          {/* Custom Toggle Switch */}
           <div
             className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition 
                         ${
@@ -81,7 +82,6 @@ export default function PricingPlans() {
             />
           </div>
 
-          {/* Annual Option */}
           <span className={isAnnual ? "font-medium" : "text-muted-foreground"}>
             Annual
             <span className="ml-2 text-xs bg-muted px-2 py-0.5 rounded-full bg-[#ffdebe]">
@@ -112,7 +112,7 @@ export default function PricingPlans() {
                     $
                     {typeof plan.price === "number"
                       ? isAnnual
-                        ? (plan.price * 12 * 0.65).toFixed(0) // 35% discount applied
+                        ? (plan.price * 12 * 0.65).toFixed(0)
                         : plan.price
                       : plan.price}
                   </span>
@@ -144,6 +144,11 @@ export default function PricingPlans() {
                     ? "bg-white text-[#a24b33] border-[#a24b33] hover:bg-[#f6a42c] hover:text-black"
                     : "bg-[#ffdebe] text-black hover:bg-[#f6a42c]/90"
                 }`}
+                onClick={() => {
+                  if (plan.name === "Pro") {
+                    router.push("/auth/signup");
+                  }
+                }}
               >
                 Get started
                 {plan.name !== "Free" ? ` with ${plan.name}` : " for free"}

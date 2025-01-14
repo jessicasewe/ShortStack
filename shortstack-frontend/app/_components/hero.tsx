@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/button";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function Hero() {
   return (
@@ -118,12 +119,14 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          <Button
-            size="lg"
-            className="bg-[#a24b33] hover:bg-[#a24b33]/90 text-white px-8 py-6 text-lg rounded-full"
-          >
-            Get started
-          </Button>
+          <Link href="/auth/pricing">
+            <Button
+              size="lg"
+              className="bg-[#a24b33] hover:bg-[#a24b33]/90 text-white px-8 py-6 text-lg rounded-full"
+            >
+              Get started
+            </Button>
+          </Link>
         </motion.div>
       </div>
 

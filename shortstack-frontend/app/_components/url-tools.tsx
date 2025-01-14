@@ -1,10 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff, Link2, QrCode } from "lucide-react";
+import { motion } from "framer-motion";
+import { Eye, EyeOff } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/tabs";
 import { Button } from "@/components/button";
 import { Input } from "@/components/ui/input";
+
+// Star component for background decoration
+function Star({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={`w-4 h-4 ${className}`}
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+    </svg>
+  );
+}
 
 export default function URLTools() {
   const [longUrl, setLongUrl] = useState("");
@@ -13,9 +29,43 @@ export default function URLTools() {
   const [password, setPassword] = useState("");
   const [showpassword, setshowPassword] = useState(false);
 
+  // Generate random positions for stars
+  const stars = Array.from({ length: 20 }).map((_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    scale: Math.random() * 1.5 + 1.6,
+    opacity: Math.random() * 0.3 + 0.1,
+  }));
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#a24b33] to-[#a06b5d] py-20 px-4">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-[#a24b33] to-[#a06b5d] py-20 px-4 relative overflow-hidden">
+      {/* Background Stars */}
+      {stars.map((star) => (
+        <motion.div
+          key={star.id}
+          className="absolute"
+          initial={{ opacity: 0 }}
+          animate={{
+            opacity: star.opacity,
+            scale: [star.scale, star.scale * 1.2, star.scale],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            repeatType: "reverse",
+            delay: Math.random() * 2,
+          }}
+          style={{
+            left: `${star.x}%`,
+            top: `${star.y}%`,
+          }}
+        >
+          <Star className="text-gray-200" />
+        </motion.div>
+      ))}
+
+      <div className="max-w-3xl mx-auto relative z-10">
         <Tabs defaultValue="shortlink" className="w-full">
           <TabsList className="grid w-full grid-cols-2 gap-4 mb-8 bg-transparent p-0">
             <TabsTrigger
