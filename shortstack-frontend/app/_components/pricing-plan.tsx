@@ -147,6 +147,8 @@ export default function PricingPlans() {
                 onClick={() => {
                   if (plan.name === "Pro") {
                     router.push("/auth/signup");
+                  } else if (plan.name === "Free") {
+                    router.push("/#url-tools");
                   }
                 }}
               >

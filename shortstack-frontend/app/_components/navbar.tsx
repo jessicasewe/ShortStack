@@ -114,7 +114,14 @@ export const Navbar = () => {
             Extension
           </Link>
         </nav>
+        {/* Pricing Button */}
         <Link href="/auth/pricing">
+          <Button className="bg-white border-2 border-[#a24b33] text-[#a24b33] hover:bg-[#a24b33] hover:text-white md:inline-flex mr-4">
+            Pricing
+          </Button>
+        </Link>
+        {/* Sign Up Button */}
+        <Link href="/auth/signup">
           <Button className="bg-[#a24b33] text-white hover:bg-[#a24b33]/90 md:inline-flex">
             Sign Up
           </Button>

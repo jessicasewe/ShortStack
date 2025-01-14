@@ -39,7 +39,10 @@ export default function URLTools() {
   }));
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#a24b33] to-[#a06b5d] py-20 px-4 relative overflow-hidden">
+    <div
+      id="url-tools"
+      className="min-h-screen bg-gradient-to-b from-[#a24b33] to-[#a06b5d] py-20 px-4 relative overflow-hidden"
+    >
       {/* Background Stars */}
       {stars.map((star) => (
         <motion.div
