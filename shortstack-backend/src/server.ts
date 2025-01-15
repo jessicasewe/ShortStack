@@ -10,7 +10,7 @@ const port = process.env.PORT;
 const server = http.createServer(app);
 
 mongoose.connection.once("open", () => {
-  console.log("MongoDB connection ready");
+  console.log("MongoDB connection connected");
 });
 
 mongoose.connection.on("error", (err: any) => {
