@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Clipboard } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/tabs";
 import { Button } from "@/components/button";
 import { Input } from "@/components/ui/input";
+import QRCode from "qrcode";
 
-// Star component for background decoration
 function Star({ className = "" }: { className?: string }) {
   return (
     <svg
@@ -25,11 +25,85 @@ function Star({ className = "" }: { className?: string }) {
 export default function URLTools() {
   const [longUrl, setLongUrl] = useState("");
   const [qrUrl, setQrUrl] = useState("");
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
   const [isPasswordProtected, setIsPasswordProtected] = useState(false);
   const [password, setPassword] = useState("");
   const [showpassword, setshowPassword] = useState(false);
+  const [shortenedUrl, setShortenedUrl] = useState("");
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  // const [enteredPassword, setEnteredPassword] = useState("");
+  const originalUrl = longUrl;
+  const [qrGenerated, setQrGenerated] = useState(false);
 
-  // Generate random positions for stars
+  const handleShortenUrl = async () => {
+    try {
+      console.log("Sending request with data:", { originalUrl, password });
+
+      const response = await fetch("http://localhost:5000/shorten", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          originalUrl: originalUrl,
+          password: isPasswordProtected ? password : undefined,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        setShortenedUrl(data.shortUrl);
+      } else {
+        console.error("Error shortening URL:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Request failed:", error);
+    }
+  };
+
+  const handleGenerateQR = async () => {
+    if (qrUrl.trim() !== "") {
+      try {
+        const dataUrl = await QRCode.toDataURL(qrUrl);
+        setQrCodeDataUrl(dataUrl);
+        setQrGenerated(true);
+      } catch (error) {
+        console.error("Failed to generate QR code:", error);
+      }
+    } else {
+      alert("Please enter a valid URL");
+    }
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(shortenedUrl);
+    alert("Shortened URL copied to clipboard!");
+  };
+
+  // const handleAccessShortenedUrl = async () => {
+  //   try {
+  //     const response = await fetch(shortenedUrl, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         password: enteredPassword,
+  //       }),
+  //     });
+
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       window.location.href = data.originalUrl;
+  //     } else {
+  //       alert("Invalid password");
+  //     }
+  //   } catch (error) {
+  //     console.error("Request failed:", error);
+  //   }
+  // };
+
   const stars = Array.from({ length: 20 }).map((_, i) => ({
     id: i,
     x: Math.random() * 100,
@@ -43,7 +117,6 @@ export default function URLTools() {
       id="url-tools"
       className="min-h-screen bg-gradient-to-b from-[#a24b33] to-[#a06b5d] py-20 px-4 relative overflow-hidden"
     >
-      {/* Background Stars */}
       {stars.map((star) => (
         <motion.div
           key={star.id}
@@ -150,7 +223,7 @@ export default function URLTools() {
               <h2 className="text-3xl font-bold text-[#001233] mb-2">
                 Shorten a long link
               </h2>
-              <p className="text-gray-600 mb-8">No credit card required.</p>
+              <p className="text-gray-600 mb-8">Shortern your url with Ease</p>
               <div className="space-y-6">
                 <div>
                   <label
@@ -168,6 +241,32 @@ export default function URLTools() {
                     className="w-full p-6 text-lg rounded-xl border-gray-400 bg-white"
                   />
                 </div>
+                {shortenedUrl && (
+                  <div className="mt-4">
+                    <label
+                      htmlFor="shortenedUrl"
+                      className="text-lg font-semibold text-[#001233] mb-2 block"
+                    >
+                      Your shortened URL:
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <a
+                        href="#"
+                        onClick={() => setShowPasswordPrompt(true)}
+                        className="text-[#a24b33] underline"
+                      >
+                        {shortenedUrl}
+                      </a>
+                      <button
+                        type="button"
+                        className="text-gray-500 hover:text-gray-700"
+                        onClick={handleCopy}
+                      >
+                        <Clipboard size={24} />
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <div className="space-y-4">
                   <div className="flex items-center">
                     <input
@@ -214,8 +313,9 @@ export default function URLTools() {
                 <Button
                   size="lg"
                   className="w-full md:w-auto bg-[#a24b33] hover:bg-[#a06b5d] text-lg px-8 py-6 rounded-xl"
+                  onClick={handleShortenUrl}
                 >
-                  Get your link for free
+                  Get your link
                   <span className="ml-2">→</span>
                 </Button>
               </div>
@@ -223,7 +323,7 @@ export default function URLTools() {
           </TabsContent>
 
           <TabsContent value="qrcode">
-            <div className="bg-white rounded-3xl p-8 md:p-12">
+            <div className="bg-white rounded-3xl p-8">
               <h2 className="text-3xl font-bold text-[#001233] mb-2">
                 Create a QR Code
               </h2>
@@ -247,13 +347,20 @@ export default function URLTools() {
                     className="w-full p-6 text-lg rounded-xl border-gray-200"
                   />
                 </div>
+
                 <Button
                   size="lg"
                   className="w-full md:w-auto bg-[#a24b33] hover:bg-[#a06b5d] text-lg px-8 py-6 rounded-xl"
+                  onClick={handleGenerateQR}
                 >
                   Generate QR Code
-                  <span className="ml-2">→</span>
                 </Button>
+
+                {qrGenerated && qrCodeDataUrl && (
+                  <div className="flex justify-center mt-6">
+                    <img src={qrCodeDataUrl} alt="QR Code" />
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>

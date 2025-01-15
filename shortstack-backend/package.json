@@ -17,7 +17,9 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.9.5"
+    "mongoose": "^8.9.5",
+    "qrcode": "^1.5.4",
+    "qrcode.react": "^4.2.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -25,6 +27,7 @@
     "@types/express": "^5.0.0",
     "@types/mongoose": "^5.11.97",
     "@types/node": "^22.10.6",
+    "@types/qrcode": "^1.5.5",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
