@@ -7,6 +7,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/tabs";
 import { Button } from "@/components/button";
 import { Input } from "@/components/ui/input";
 import QRCode from "qrcode";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+
+const colors = [
+  { id: "black", value: "#000000" },
+  { id: "red", value: "#EF4444" },
+  { id: "orange", value: "#F97316" },
+  { id: "green", value: "#22C55E" },
+  { id: "light-blue", value: "#3B82F6" },
+  { id: "blue", value: "#2563EB" },
+  { id: "purple", value: "#7C3AED" },
+  { id: "pink", value: "#EC4899" },
+];
 
 function Star({ className = "" }: { className?: string }) {
   return (
@@ -31,9 +44,9 @@ export default function URLTools() {
   const [showpassword, setshowPassword] = useState(false);
   const [shortenedUrl, setShortenedUrl] = useState("");
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
-  // const [enteredPassword, setEnteredPassword] = useState("");
   const originalUrl = longUrl;
   const [qrGenerated, setQrGenerated] = useState(false);
+  const [qrColor, setQrColor] = useState("#000000");
 
   const handleShortenUrl = async () => {
     try {
@@ -65,7 +78,15 @@ export default function URLTools() {
   const handleGenerateQR = async () => {
     if (qrUrl.trim() !== "") {
       try {
-        const dataUrl = await QRCode.toDataURL(qrUrl);
+        const options = {
+          color: {
+            dark: qrColor,
+          },
+          margin: 2,
+          width: 200,
+        };
+
+        const dataUrl = await QRCode.toDataURL(qrUrl, options);
         setQrCodeDataUrl(dataUrl);
         setQrGenerated(true);
       } catch (error) {
@@ -80,29 +101,6 @@ export default function URLTools() {
     navigator.clipboard.writeText(shortenedUrl);
     alert("Shortened URL copied to clipboard!");
   };
-
-  // const handleAccessShortenedUrl = async () => {
-  //   try {
-  //     const response = await fetch(shortenedUrl, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         password: enteredPassword,
-  //       }),
-  //     });
-
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       window.location.href = data.originalUrl;
-  //     } else {
-  //       alert("Invalid password");
-  //     }
-  //   } catch (error) {
-  //     console.error("Request failed:", error);
-  //   }
-  // };
 
   const stars = Array.from({ length: 20 }).map((_, i) => ({
     id: i,
@@ -223,7 +221,7 @@ export default function URLTools() {
               <h2 className="text-3xl font-bold text-[#001233] mb-2">
                 Shorten a long link
               </h2>
-              <p className="text-gray-600 mb-8">Shortern your url with Ease</p>
+              <p className="text-gray-600 mb-8">Shorten your URL with ease.</p>
               <div className="space-y-6">
                 <div>
                   <label
@@ -346,6 +344,39 @@ export default function URLTools() {
                     onChange={(e) => setQrUrl(e.target.value)}
                     className="w-full p-6 text-lg rounded-xl border-gray-200"
                   />
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-[#001233] mb-2">
+                    Select QR Code Color
+                  </h3>
+                  <RadioGroup
+                    defaultValue="black"
+                    className="flex flex-wrap gap-4"
+                    onValueChange={(value) => {
+                      const selectedColor = colors.find(
+                        (color) => color.id === value
+                      );
+                      if (selectedColor) {
+                        setQrColor(selectedColor.value);
+                      }
+                    }}
+                  >
+                    {colors.map((color) => (
+                      <div key={color.id}>
+                        <RadioGroupItem
+                          value={color.id}
+                          id={color.id}
+                          className="peer sr-only"
+                        />
+                        <Label
+                          htmlFor={color.id}
+                          className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border-4 border-white peer-data-[state=checked]:ring-2 peer-data-[state=checked]:ring-primary peer-data-[state=checked]:ring-offset-2 hover:opacity-90"
+                          style={{ backgroundColor: color.value }}
+                        />
+                      </div>
+                    ))}
+                  </RadioGroup>
                 </div>
 
                 <Button
