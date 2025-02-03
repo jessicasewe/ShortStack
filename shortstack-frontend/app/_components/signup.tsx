@@ -6,6 +6,7 @@ import { Eye, EyeOff, Check } from "lucide-react";
 import { Button } from "@/components/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Toaster, toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -436,7 +437,13 @@ export default function MultiStepSignUp() {
                   </p>
                 </div>
                 <Button
-                  onClick={() => (window.location.href = "/dashboard")}
+                  onClick={() => {
+                    toast.success("Sign-up Successful!", {
+                      description:
+                        "Welcome to our platform. You're all set to get started!",
+                    });
+                    window.location.href = "/dashboard";
+                  }}
                   className="w-full bg-[#a24b33] hover:bg-[#a06b5d] text-white rounded-xl h-12"
                 >
                   Get Started

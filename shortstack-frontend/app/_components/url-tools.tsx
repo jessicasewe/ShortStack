@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import QRCode from "qrcode";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 const colors = [
   { id: "black", value: "#000000" },
@@ -63,14 +64,38 @@ export default function URLTools() {
         }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
-        console.log(data);
+        if (data.msg === "This URL is already shortened.") {
+          toast.info("URL Already Shortened", {
+            description:
+              "This URL has already been shortened. Here's your existing short URL.",
+            action: {
+              label: "Copy",
+              onClick: () => navigator.clipboard.writeText(data.shortUrl),
+            },
+          });
+        } else {
+          toast.success("URL Shortened Successfully", {
+            description: "Your URL has been shortened successfully!",
+            action: {
+              label: "Copy",
+              onClick: () => navigator.clipboard.writeText(data.shortUrl),
+            },
+          });
+        }
         setShortenedUrl(data.shortUrl);
       } else {
-        console.error("Error shortening URL:", response.statusText);
+        toast.error("Error Shortening URL", {
+          description:
+            data.msg || "An error occurred while shortening the URL.",
+        });
       }
     } catch (error) {
+      toast.error("Request Failed", {
+        description: "Failed to connect to the server. Please try again later.",
+      });
       console.error("Request failed:", error);
     }
   };
@@ -126,7 +151,7 @@ export default function URLTools() {
           }}
           transition={{
             duration: 2,
-            repeat: Infinity,
+            repeat: Number.POSITIVE_INFINITY,
             repeatType: "reverse",
             delay: Math.random() * 2,
           }}
@@ -389,7 +414,10 @@ export default function URLTools() {
 
                 {qrGenerated && qrCodeDataUrl && (
                   <div className="flex justify-center mt-6">
-                    <img src={qrCodeDataUrl} alt="QR Code" />
+                    <img
+                      src={qrCodeDataUrl || "/placeholder.svg"}
+                      alt="QR Code"
+                    />
                   </div>
                 )}
               </div>
