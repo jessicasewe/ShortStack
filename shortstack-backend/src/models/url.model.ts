@@ -8,7 +8,14 @@ const urlSchema = new Schema({
       validator: (v: string) => /^(http|https):\/\/[^ "]+$/.test(v),
       message: "Invalid URL format",
     },
-    password: { type: String, required: false },
+  },
+  title: {
+    type: String,
+    required: false,
+  },
+  password: {
+    type: String,
+    required: false,
   },
   shortUrl: {
     type: String,
