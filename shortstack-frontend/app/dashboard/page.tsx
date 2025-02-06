@@ -66,7 +66,7 @@ export default function DashboardHome() {
                 <div className="relative">
                   <div className="absolute -left-4 -top-1">
                     <div className="bg-white border rounded px-2 py-1 text-sm">
-                      bit.ly/
+                      shortstck.ly/
                     </div>
                   </div>
                   <QrCode className="w-20 h-20 text-[#a24b33]" />
@@ -76,10 +76,12 @@ export default function DashboardHome() {
                 <h2 className="text-xl font-semibold mb-4">
                   Make it scannable
                 </h2>
-                <Button variant="outline" className="gap-2">
-                  <QrCode className="h-4 w-4" />
-                  Go to Codes
-                </Button>
+                <Link href="/dashboard/qr-code">
+                  <Button variant="outline" className="gap-2">
+                    <QrCode className="h-4 w-4" />
+                    Go to Codes
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
