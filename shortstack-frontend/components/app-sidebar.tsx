@@ -43,7 +43,7 @@ const items = [
   },
   {
     title: "QR Code",
-    url: "/dashboard/qrcode",
+    url: "/dashboard/qr-code",
     icon: QrCode,
   },
   {
