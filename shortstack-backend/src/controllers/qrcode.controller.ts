@@ -17,12 +17,16 @@ export const createQRCodeHandler = async (req: Request, res: Response) => {
   }
 
   try {
-    // Parse the qrCodeData to get the color
-    const { color } = JSON.parse(qrCodeData);
+    // Parse the qrCodeData to get the color and background color
+    const { color, backgroundColor } = JSON.parse(qrCodeData);
 
-    // Generate QR Code with the selected color
+    // Generate QR Code with the selected color and background color
     logger.info(`Generating QR Code for destination URL: ${destinationUrl}`);
-    const qrCodeDataUrl = await generateQRCode(destinationUrl, color);
+    const qrCodeDataUrl = await generateQRCode(
+      destinationUrl,
+      color,
+      backgroundColor
+    );
 
     // Save to database
     const qrCode = await QRCode.create({
@@ -30,6 +34,7 @@ export const createQRCodeHandler = async (req: Request, res: Response) => {
       destinationUrl,
       qrCodeData: qrCodeDataUrl,
       color, // Store the selected color
+      backgroundColor, // Store the selected background color
     });
 
     logger.info(`QR Code successfully created with ID: ${qrCode._id}`);

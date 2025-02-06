@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 interface QRCodeStyle {
   color: string;
   frame?: string;
+  backgroundColor?: string;
 }
 
 export function CreateQRDialog({ onCreate }: { onCreate: () => void }) {
@@ -30,6 +31,7 @@ export function CreateQRDialog({ onCreate }: { onCreate: () => void }) {
   const [qrStyle, setQrStyle] = useState<QRCodeStyle>({
     color: "#000000",
     frame: "none",
+    backgroundColor: "#FFFFFF",
   });
   const [isOpen, setIsOpen] = useState(false);
 
@@ -192,7 +194,7 @@ export function CreateQRDialog({ onCreate }: { onCreate: () => void }) {
           body: JSON.stringify({
             title,
             destinationUrl: url,
-            qrCodeData: JSON.stringify(qrStyle), // Send the selected color
+            qrCodeData: JSON.stringify(qrStyle),
           }),
         }
       );
@@ -210,7 +212,6 @@ export function CreateQRDialog({ onCreate }: { onCreate: () => void }) {
       // Close the modal
       setIsOpen(false);
 
-      // Reload the page to reflect the new QR code
       window.location.reload();
     } catch (error) {
       console.error("Error creating QR code:", error);
@@ -225,6 +226,7 @@ export function CreateQRDialog({ onCreate }: { onCreate: () => void }) {
           size="lg"
           className="bg-[#a24b33] hover:bg-[#ebd4cd] hover:text-black"
         >
+          <Plus className="h-4 w-4" />
           Create QR code
         </Button>
       </DialogTrigger>
@@ -335,6 +337,37 @@ export function CreateQRDialog({ onCreate }: { onCreate: () => void }) {
                   </div>
                 </div>
 
+                <div className="grid gap-4 mt-4">
+                  <div>
+                    <Label className="text-sm">Background color</Label>
+                    <div className="flex gap-2 mt-1">
+                      <Input
+                        type="color"
+                        value={qrStyle.backgroundColor}
+                        onChange={(e) =>
+                          setQrStyle({
+                            ...qrStyle,
+                            backgroundColor: e.target.value,
+                          })
+                        }
+                        className="w-[100px] p-1"
+                      />
+                      <Input
+                        value={(
+                          qrStyle.backgroundColor || "#FFFFFF"
+                        ).toUpperCase()}
+                        onChange={(e) =>
+                          setQrStyle({
+                            ...qrStyle,
+                            backgroundColor: e.target.value,
+                          })
+                        }
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div>
                   <Label className="text-base font-semibold">
                     Select a frame
@@ -368,7 +401,7 @@ export function CreateQRDialog({ onCreate }: { onCreate: () => void }) {
                       size={200}
                       level="H"
                       fgColor={qrStyle.color}
-                      bgColor="#FFFFFF"
+                      bgColor={qrStyle.backgroundColor || "#FFFFFF"} // Ensure a fallback value
                       className="w-full h-full max-w-[200px] max-h-[200px]"
                     />
                   )}

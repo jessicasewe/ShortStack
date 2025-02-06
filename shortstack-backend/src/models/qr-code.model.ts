@@ -23,6 +23,11 @@ const qrCodeSchema = new Schema(
       required: false,
       default: "#000000",
     },
+    backgroundColor: {
+      type: String,
+      required: false,
+      default: "#FFFFFF",
+    },
     createdAt: {
       type: Date,
       default: Date.now,

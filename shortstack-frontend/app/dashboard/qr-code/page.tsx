@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { CreateQRDialog } from "@/app/_components/create-qr-dialog";
 
 interface QRCodeItem {
+  backgroundColor: string;
   color: string;
   _id: string;
   title: string;
@@ -179,6 +180,7 @@ export default function QRCodesPage() {
               onSelect={() => handleSelectItem(qrCode._id)}
               onDelete={() => handleDelete(qrCode._id)}
               color={qrCode.color}
+              bgColor={qrCode.backgroundColor}
             />
           ))
         ) : (

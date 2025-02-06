@@ -35,6 +35,7 @@ interface QRCodeCardProps {
   onSelect: () => void;
   onDelete: () => void;
   color: string;
+  bgColor: string;
 }
 
 export default function QRCodeCard({
@@ -47,6 +48,7 @@ export default function QRCodeCard({
   onSelect,
   onDelete,
   color,
+  bgColor,
 }: QRCodeCardProps) {
   const handleCopy = () => {
     navigator.clipboard.writeText(url).then(() => {
@@ -65,7 +67,6 @@ export default function QRCodeCard({
   };
 
   const handleDownloadPNG = () => {
-    // Attempt to locate the canvas
     const canvas = document.getElementById(
       `qr-code-${id}`
     ) as HTMLCanvasElement;
@@ -78,7 +79,6 @@ export default function QRCodeCard({
     }
 
     try {
-      // Generate PNG data from the canvas
       const pngUrl = canvas
         .toDataURL("image/png")
         .replace("image/png", "image/octet-stream");
@@ -164,7 +164,7 @@ export default function QRCodeCard({
                 size={112}
                 level="H"
                 fgColor={color}
-                bgColor="#FFFFFF"
+                bgColor={bgColor}
               />
             </div>
             <div className="text-center mt-2 text-sm text-gray-600 italic">
@@ -235,7 +235,7 @@ export default function QRCodeCard({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem onClick={onDelete}>
+                    <DropdownMenuItem>
                       <Pencil className="h-4 w-4 mr-2" />
                       Edit
                     </DropdownMenuItem>
@@ -256,6 +256,7 @@ export default function QRCodeCard({
                 date={date}
                 color={color}
                 id={id}
+                bgColor={bgColor}
               />
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />

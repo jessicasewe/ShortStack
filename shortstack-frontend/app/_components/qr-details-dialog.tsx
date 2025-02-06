@@ -13,9 +13,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Download } from "lucide-react";
+import { Download, Copy } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 interface QRDetailsDialogProps {
   url: string;
@@ -24,6 +25,7 @@ interface QRDetailsDialogProps {
   date: string;
   color: string;
   id: string;
+  bgColor: string;
 }
 
 export function QRDetailsDialog({
@@ -33,6 +35,7 @@ export function QRDetailsDialog({
   date,
   color,
   id,
+  bgColor,
 }: QRDetailsDialogProps) {
   const handleDownloadPNG = () => {
     const canvas = document.getElementById(
@@ -79,6 +82,12 @@ export function QRDetailsDialog({
     }
   };
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(url).then(() => {
+      toast.success("URL copied to clipboard!");
+    });
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -112,7 +121,7 @@ export function QRDetailsDialog({
                 size={224}
                 level="H"
                 fgColor={color}
-                bgColor="#FFFFFF"
+                bgColor={bgColor}
               />
             </div>
           </motion.div>
@@ -133,6 +142,14 @@ export function QRDetailsDialog({
             >
               {url}
             </a>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCopy}
+              className="text-black"
+            >
+              <Copy className="h-4 w-4 mr-2" />
+            </Button>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 10 }}

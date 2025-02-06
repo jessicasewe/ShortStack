@@ -2,13 +2,14 @@ import QRCode from "qrcode";
 
 export const generateQRCode = async (
   url: string,
-  color: string = "#000000"
+  color: string = "#000000",
+  backgroundColor: string = "#FFFFFF"
 ): Promise<string> => {
   try {
     const qrCodeDataUrl = await QRCode.toDataURL(url, {
       color: {
-        dark: color, // Apply the selected color
-        light: "#FFFFFF", // Background color (white)
+        dark: color,
+        light: backgroundColor,
       },
     });
     return qrCodeDataUrl;
