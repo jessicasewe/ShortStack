@@ -3,7 +3,7 @@ import cors from "cors";
 import userRoutes from "./routes/user.router";
 import authRouter from "./routes/auth.router";
 import urlRouter from "./routes/url.router";
-import router from "./routes/qrcode.router";
+import qrCodeRouter from "./routes/qrcode.router";
 
 const app = express();
 
@@ -19,6 +19,6 @@ app.get("/", (req, res) => {
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRouter);
 app.use("/", urlRouter);
-app.use("/", router);
+app.use("/api/qrcodes", qrCodeRouter);
 
 export default app;

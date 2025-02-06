@@ -1,10 +1,16 @@
 import { Router } from "express";
-import { generateQRCodeHandler } from "../controllers/qrcode.controller";
+import {
+  createQRCodeHandler,
+  getAllQRCodesHandler,
+  deleteQRCodeHandler,
+} from "../controllers/qrcode.controller";
 import { rateLimiter } from "../middlewares/rate-limiter";
 
-const router = Router();
+const qrCodeRouter = Router();
 
-router.use(rateLimiter());
-router.post("/generate-qr", generateQRCodeHandler as any);
+qrCodeRouter.use(rateLimiter());
+qrCodeRouter.post("/generate-qr", createQRCodeHandler as any);
+qrCodeRouter.get("/qr-codes", getAllQRCodesHandler);
+qrCodeRouter.delete("/qr-codes/:id", deleteQRCodeHandler);
 
-export default router;
+export default qrCodeRouter;
