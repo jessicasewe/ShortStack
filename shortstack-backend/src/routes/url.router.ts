@@ -17,11 +17,8 @@ urlRouter.use((req, res, next) => {
 
 urlRouter.use(rateLimiter());
 
-// Define static routes first
 urlRouter.get("/links", getLinks);
 urlRouter.delete("/links/:id", deleteLinkById as any);
-
-// Dynamic route should come after static routes
 urlRouter.post("/shorten", createShortUrl as any);
 urlRouter.get("/:shortUrl", redirectToOriginalUrl as any);
 

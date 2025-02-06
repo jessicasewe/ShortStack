@@ -17,7 +17,6 @@ export const createShortUrl = async (req: Request, res: Response) => {
     const { originalUrl, password, title } = req.body;
     logger.info(`Request to create short URL for: ${originalUrl}`);
 
-    // Check if the URL already exists in the database
     const existingUrl = await Url.findOne({ originalUrl });
     if (existingUrl) {
       logger.info(`URL already shortened: ${originalUrl}`);
@@ -60,11 +59,10 @@ export const createShortUrl = async (req: Request, res: Response) => {
 
 export const redirectToOriginalUrl = async (req: Request, res: Response) => {
   try {
-    const shortUrlId = req.params.shortUrl; // This is the short URL ID (e.g., y01v99)
+    const shortUrlId = req.params.shortUrl;
     const { password } = req.body;
     logger.info(`Request to redirect from short URL ID: ${shortUrlId}`);
 
-    // Find the URL in the database by its ID instead of the full short URL
     const urlData = await Url.findOne({
       shortUrl: `http://localhost:5000/${shortUrlId}`,
     });
@@ -103,10 +101,8 @@ export const getLinks = async (req: Request, res: Response) => {
   try {
     logger.info("Fetching all links from the database.");
 
-    // Fetch all URLs from the database
     const links = await Url.find({});
 
-    // Log the fetched data to verify it's being retrieved correctly
     logger.info(`Fetched ${links.length} links:`, links);
 
     res.status(200).json({ links });
