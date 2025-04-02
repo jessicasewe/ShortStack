@@ -101,12 +101,12 @@ export default function QRCodesPage() {
     <div className="p-8 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-xl font-bold text-gray-900">QR Codes</h1>
-        <CreateQRDialog
+        {/* <CreateQRDialog
           onCreate={function (): void {
             console.log("QR code creation triggered.");
             generateQRCode();
           }}
-        />
+        /> */}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
