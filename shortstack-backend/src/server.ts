@@ -25,7 +25,7 @@ async function startServer() {
     logger.info("Database connected successfully");
 
     server.listen(port, () => {
-      logger.info(`Server running on http://shortstck.me:${port}`);
+      logger.info(`Server running on http://localhost:${port}`);
     });
   } catch (error) {
     logger.error("Error starting server", { error });
