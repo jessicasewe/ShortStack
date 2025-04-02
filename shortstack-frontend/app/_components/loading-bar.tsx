@@ -1,11 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-// import { usePathname, useSearchParams } from 'next/navigation'
 
 export function LoadingBar() {
-  // const pathname = usePathname()
-  // const searchParams = useSearchParams()
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -37,7 +34,6 @@ export function LoadingBar() {
 
     startLoading();
 
-    // Simulate completion after navigation
     const timeout = setTimeout(completeLoading, 1000);
 
     return () => {

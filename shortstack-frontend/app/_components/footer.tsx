@@ -17,7 +17,6 @@ export default function Footer() {
 
   return (
     <footer className="bg-gray-50">
-      {/* Scrolling Text Section */}
       <div className="relative w-full overflow-hidden py-12 bg-gradient-to-b from-white to-gray-50">
         <motion.div
           initial={{ x: "0%" }}
@@ -29,7 +28,6 @@ export default function Footer() {
           }}
           className="flex whitespace-nowrap"
         >
-          {/* First set of items */}
           {scrollingItems.map((item, index) => (
             <div
               key={index}
@@ -38,7 +36,6 @@ export default function Footer() {
               {item}
             </div>
           ))}
-          {/* Duplicate set for seamless loop */}
           {scrollingItems.map((item, index) => (
             <div
               key={`duplicate-${index}`}

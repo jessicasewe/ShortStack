@@ -28,6 +28,11 @@ const qrCodeSchema = new Schema(
       required: false,
       default: "#FFFFFF",
     },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
+    },
     createdAt: {
       type: Date,
       default: Date.now,

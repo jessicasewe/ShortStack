@@ -114,11 +114,9 @@ export default function QRCodeCard({
 
         pdf.addImage(imgData, "PNG", x, y, imgWidth, imgHeight);
 
-        // Add text below the QR code (if necessary)
         if (title) pdf.text(title, x, y + imgHeight + 10);
         if (url) pdf.text(url, x, y + imgHeight + 20);
 
-        // Save the PDF
         pdf.save(`${title || "qr-code"}.pdf`);
       } catch (error) {
         console.error("Error generating PDF:", error);

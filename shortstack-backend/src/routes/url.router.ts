@@ -5,7 +5,6 @@ import {
   getLinks,
   deleteLinkById,
 } from "../controllers/url.controller";
-import { rateLimiter } from "../middlewares/rate-limiter";
 import logger from "../utils/logger";
 
 const urlRouter = Router();
@@ -15,11 +14,9 @@ urlRouter.use((req, res, next) => {
   next();
 });
 
-urlRouter.use(rateLimiter());
-
 urlRouter.get("/links", getLinks);
-urlRouter.delete("/links/:id", deleteLinkById as any);
-urlRouter.post("/shorten", createShortUrl as any);
-urlRouter.get("/:shortUrl", redirectToOriginalUrl as any);
+urlRouter.delete("/links/:id", deleteLinkById);
+urlRouter.post("/shorten", createShortUrl);
+urlRouter.get("/:shortUrl", redirectToOriginalUrl);
 
 export default urlRouter;

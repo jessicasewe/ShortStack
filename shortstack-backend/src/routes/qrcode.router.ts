@@ -4,11 +4,11 @@ import {
   getAllQRCodesHandler,
   deleteQRCodeHandler,
 } from "../controllers/qrcode.controller";
-import { rateLimiter } from "../middlewares/rate-limiter";
 
 const qrCodeRouter = Router();
 
-qrCodeRouter.use(rateLimiter());
+// Protect all routes with authentication
+
 qrCodeRouter.post("/generate-qr", createQRCodeHandler as any);
 qrCodeRouter.get("/qr-codes", getAllQRCodesHandler);
 qrCodeRouter.delete("/qr-codes/:id", deleteQRCodeHandler);

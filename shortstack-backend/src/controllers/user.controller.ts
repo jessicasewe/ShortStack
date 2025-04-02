@@ -1,22 +1,17 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/user.model";
-import logger from "../utils/logger"; // Import the custom logger
+import logger from "../utils/logger";
 
-// Create user {signup}
 export const createUser = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, confirmPassword } = req.body;
+    const { firstName, lastName, email, password, confirmPassword } = req.body;
 
-    logger.info("Received signup request", { name, email });
-
-    if (!name || !email || !password || !confirmPassword) {
-      logger.warn("Signup failed: Missing required fields");
+    if (!firstName || !lastName || !email || !password || !confirmPassword) {
       return res.status(400).json({ msg: "All fields are required" });
     }
 
     if (password !== confirmPassword) {
-      logger.warn("Signup failed: Passwords do not match", { email });
       return res
         .status(400)
         .json({ msg: "Password and Confirm Password do not match" });
@@ -24,24 +19,31 @@ export const createUser = async (req: Request, res: Response) => {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      logger.warn("Signup failed: User already exists", { email });
       return res.status(400).json({ msg: "User already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
-      name,
+      firstName,
+      lastName,
       email,
       password: hashedPassword,
     });
 
     await newUser.save();
-    logger.info("User created successfully", { email });
 
-    res.status(201).json({ msg: "User created successfully" });
+    res.status(201).json({
+      msg: "User created successfully",
+      user: {
+        id: newUser._id,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+      },
+    });
   } catch (error) {
-    logger.error("Error creating user", { error });
+    console.error("Error creating user:", error);
     res.status(500).json({ msg: "Internal server error" });
   }
 };

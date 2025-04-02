@@ -37,12 +37,20 @@ export default function QRCodesPage() {
   useEffect(() => {
     const fetchQRCodes = async () => {
       try {
+        const token = localStorage.getItem("token");
         const response = await fetch(
-          "http://localhost:5000/api/qrcodes/qr-codes"
+          "http://localhost:5000/api/qrcodes/qr-codes",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
+
         if (!response.ok) {
           throw new Error("Failed to fetch QR codes");
         }
+
         const data = await response.json();
         setQRCodes(data);
         setIsLoading(false);
@@ -51,7 +59,6 @@ export default function QRCodesPage() {
         toast.error("Failed to fetch QR codes");
       }
     };
-
     fetchQRCodes();
   }, []);
 
@@ -63,10 +70,14 @@ export default function QRCodesPage() {
 
   const handleDelete = async (id: string) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `http://localhost:5000/api/qrcodes/qr-codes/${id}`,
         {
           method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
@@ -89,7 +100,7 @@ export default function QRCodesPage() {
   return (
     <div className="p-8 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">QR Codes</h1>
+        <h1 className="text-xl font-bold text-gray-900">QR Codes</h1>
         <CreateQRDialog
           onCreate={function (): void {
             console.log("QR code creation triggered.");

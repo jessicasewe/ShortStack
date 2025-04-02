@@ -184,12 +184,14 @@ export function CreateQRDialog({ onCreate }: { onCreate: () => void }) {
 
   const handleCreate = async () => {
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(
         "http://localhost:5000/api/qrcodes/generate-qr",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             title,
@@ -260,7 +262,9 @@ export function CreateQRDialog({ onCreate }: { onCreate: () => void }) {
               </div>
             </div>
             <div className="flex justify-end gap-3">
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline" onClick={() => setIsOpen(false)}>
+                Cancel
+              </Button>
               <Button
                 className="bg-[#a24b33] hover:bg-[#ebd4cd] hover:text-black"
                 onClick={() => setStep(2)}
@@ -401,7 +405,7 @@ export function CreateQRDialog({ onCreate }: { onCreate: () => void }) {
                       size={200}
                       level="H"
                       fgColor={qrStyle.color}
-                      bgColor={qrStyle.backgroundColor || "#FFFFFF"} // Ensure a fallback value
+                      bgColor={qrStyle.backgroundColor || "#FFFFFF"}
                       className="w-full h-full max-w-[200px] max-h-[200px]"
                     />
                   )}

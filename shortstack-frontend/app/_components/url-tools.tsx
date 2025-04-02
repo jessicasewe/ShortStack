@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Clipboard } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/tabs";
@@ -48,11 +48,23 @@ export default function URLTools() {
   const originalUrl = longUrl;
   const [qrGenerated, setQrGenerated] = useState(false);
   const [qrColor, setQrColor] = useState("#000000");
+  const [stars, setStars] = useState<
+    Array<{ id: number; x: number; y: number; scale: number; opacity: number }>
+  >([]);
+
+  useEffect(() => {
+    const generatedStars = Array.from({ length: 20 }).map((_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      scale: Math.random() * 1.5 + 1.6,
+      opacity: Math.random() * 0.3 + 0.1,
+    }));
+    setStars(generatedStars);
+  }, []);
 
   const handleShortenUrl = async () => {
     try {
-      console.log("Sending request with data:", { originalUrl, password });
-
       const response = await fetch("http://localhost:5000/shorten", {
         method: "POST",
         headers: {
@@ -73,7 +85,7 @@ export default function URLTools() {
               "This URL has already been shortened. Here's your existing short URL.",
             action: {
               label: "Copy",
-              onClick: () => navigator.clipboard.writeText(data.shortUrl),
+              onClick: () => handleCopy(data.shortUrl),
             },
           });
         } else {
@@ -81,7 +93,7 @@ export default function URLTools() {
             description: "Your URL has been shortened successfully!",
             action: {
               label: "Copy",
-              onClick: () => navigator.clipboard.writeText(data.shortUrl),
+              onClick: () => handleCopy(data.shortUrl),
             },
           });
         }
@@ -101,7 +113,7 @@ export default function URLTools() {
   };
 
   const handleGenerateQR = async () => {
-    if (qrUrl.trim() !== "") {
+    if (typeof window !== "undefined" && qrUrl.trim() !== "") {
       try {
         const options = {
           color: {
@@ -118,22 +130,18 @@ export default function URLTools() {
         console.error("Failed to generate QR code:", error);
       }
     } else {
-      alert("Please enter a valid URL");
+      toast.error("Please enter a valid URL.");
     }
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(shortenedUrl);
-    alert("Shortened URL copied to clipboard!");
+  const handleCopy = (text: string) => {
+    if (typeof window !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      toast.success("Copied to clipboard!");
+    } else {
+      toast.error("Clipboard access not available.");
+    }
   };
-
-  const stars = Array.from({ length: 20 }).map((_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    scale: Math.random() * 1.5 + 1.6,
-    opacity: Math.random() * 0.3 + 0.1,
-  }));
 
   return (
     <div
@@ -283,7 +291,7 @@ export default function URLTools() {
                       <button
                         type="button"
                         className="text-gray-500 hover:text-gray-700"
-                        onClick={handleCopy}
+                        onClick={() => handleCopy(shortenedUrl)}
                       >
                         <Clipboard size={24} />
                       </button>
@@ -291,7 +299,7 @@ export default function URLTools() {
                   </div>
                 )}
                 <div className="space-y-4">
-                  <div className="flex items-center">
+                  {/* <div className="flex items-center">
                     <input
                       id="passwordProtected"
                       type="checkbox"
@@ -307,7 +315,7 @@ export default function URLTools() {
                     >
                       Password protect this URL
                     </label>
-                  </div>
+                  </div> */}
                   {isPasswordProtected && (
                     <div className="relative">
                       <Input

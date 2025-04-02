@@ -42,6 +42,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import PasswordModal from "@/app/_components/password-required";
 
 interface LinkItem {
   id: string;
@@ -62,6 +63,8 @@ export default function LinksPage() {
   const [selectedUrl, setSelectedUrl] = useState("");
   const [isPasswordProtected, setIsPasswordProtected] = useState(false);
   const [password, setPassword] = useState("");
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [selectedShortUrl, setSelectedShortUrl] = useState("");
 
   const handleShare = (url: string) => {
     console.log("Share button clicked, URL:", url);
@@ -86,14 +89,22 @@ export default function LinksPage() {
 
   const handleCreateLink = async () => {
     try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        toast.error("No token found. Please log in.");
+        return;
+      }
+
       const response = await fetch("http://localhost:5000/shorten", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           originalUrl: newLink.url,
           title: newLink.title,
+          password: isPasswordProtected ? password : undefined,
         }),
       });
 
@@ -125,14 +136,10 @@ export default function LinksPage() {
         shortUrl,
         originalUrl,
         createdAt: currentDate,
-        hasClickData: false,
-        tags: [],
       };
 
-      // Update links state
       setLinks((prevLinks) => [...prevLinks, newLinkItem]);
 
-      // Reset form and close dialog
       setNewLink({ title: "", url: "", domain: "shortstck.me" });
       setIsDialogOpen(false);
 
@@ -140,6 +147,116 @@ export default function LinksPage() {
     } catch (error) {
       console.error("Error creating link:", error);
       toast.error("Failed to create link.");
+    }
+  };
+
+  const handleAccessLink = async (shortUrl: string, password?: string) => {
+    try {
+      const response = await fetch(`http://localhost:5000/${shortUrl}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast.error(errorData.msg || "Failed to access link.");
+        return;
+      }
+
+      const data = await response.json();
+      window.location.href = data.originalUrl;
+    } catch (error) {
+      console.error("Error accessing link:", error);
+      toast.error("Failed to access link.");
+    }
+  };
+
+  useEffect(() => {
+    const handleDirectAccess = async () => {
+      const path = window.location.pathname;
+      if (path.length > 1) {
+        const shortUrlId = path.substring(1);
+        const shortUrl = `http://localhost:5000/${shortUrlId}`;
+
+        const response = await fetch(shortUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({}),
+        });
+
+        if (response.status === 400) {
+          const data = await response.json();
+          if (data.msg === "Password required") {
+            setSelectedShortUrl(shortUrlId);
+            setIsPasswordModalOpen(true);
+          }
+        }
+      }
+    };
+
+    handleDirectAccess();
+  }, []);
+
+  const handleLinkClick = (shortUrl: string) => {
+    setSelectedShortUrl(shortUrl);
+    setIsPasswordModalOpen(true);
+  };
+
+  const checkPasswordProtection = async (shortUrlId: string) => {
+    try {
+      const response = await fetch(`http://localhost:5000/${shortUrlId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (response.status === 400) {
+        const data = await response.json();
+        if (data.msg === "Password required") {
+          setSelectedShortUrl(shortUrlId);
+          setIsPasswordModalOpen(true);
+        }
+      } else if (response.ok) {
+        const data = await response.json();
+        window.location.href = data.originalUrl;
+      }
+    } catch (error) {
+      console.error("Error checking password protection:", error);
+      toast.error("Failed to check password protection.");
+    }
+  };
+
+  const handlePasswordSubmit = async (password: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/${selectedShortUrl}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ password }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast.error(errorData.msg || "Failed to access link.");
+        return;
+      }
+
+      const data = await response.json();
+      window.location.href = data.originalUrl;
+    } catch (error) {
+      console.error("Error accessing link:", error);
+      toast.error("Failed to access link.");
     }
   };
 
@@ -173,8 +290,12 @@ export default function LinksPage() {
 
   const handleDelete = async (id: string) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(`http://localhost:5000/links/${id}`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
@@ -195,7 +316,14 @@ export default function LinksPage() {
     const fetchLinks = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch("http://localhost:5000/links");
+        const token = localStorage.getItem("token");
+
+        const response = await fetch("http://localhost:5000/links", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         if (!response.ok) {
           throw new Error("Failed to fetch links");
         }
@@ -229,9 +357,8 @@ export default function LinksPage() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
-      {/* Header */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">ShortStack Links</h1>
+        <h1 className="text-xl font-bold text-gray-900">ShortStack Links</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button
@@ -331,7 +458,6 @@ export default function LinksPage() {
         </Dialog>
       </div>
 
-      {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -374,10 +500,8 @@ export default function LinksPage() {
         </Select>
       </div>
 
-      {/* Links List */}
       <div className="space-y-4">
         {isLoading ? (
-          // Loading skeletons
           Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className="bg-white rounded-lg border p-4">
               <div className="flex items-start gap-4">
@@ -407,7 +531,6 @@ export default function LinksPage() {
             </div>
           ))
         ) : links.length > 0 ? (
-          // Render the links
           links.map((link) => (
             <div key={link.id} className="bg-white rounded-lg border p-4">
               <div className="flex items-start gap-4">
@@ -443,7 +566,11 @@ export default function LinksPage() {
                       <div className="space-y-1">
                         <h3 className="font-medium">{link.title}</h3>
                         <a
-                          href={`https://${link.shortUrl}`}
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleLinkClick(link.shortUrl);
+                          }}
                           className="text-[#a24b33] hover:underline block"
                         >
                           {link.shortUrl}
@@ -482,7 +609,7 @@ export default function LinksPage() {
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent classname="hover:bg-orange-100">
+                        <DropdownMenuContent className="hover:bg-orange-100">
                           <DropdownMenuItem
                             onClick={() => handleDelete(link.id)}
                           >
@@ -505,7 +632,6 @@ export default function LinksPage() {
             </div>
           ))
         ) : (
-          // Fallback if no links are available
           <div className="text-center text-gray-500 py-8">
             No links found. Create a new link to get started!
           </div>
@@ -607,6 +733,11 @@ export default function LinksPage() {
           </div>
         </DialogContent>
       </Dialog>
+      <PasswordModal
+        isOpen={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
+        onSubmit={handlePasswordSubmit}
+      />
     </div>
   );
 }

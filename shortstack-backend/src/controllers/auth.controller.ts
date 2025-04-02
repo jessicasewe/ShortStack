@@ -8,37 +8,50 @@ export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
-    logger.info(`Login attempt for email: ${email}`);
-
     const user = await User.findOne({ email });
     if (!user) {
-      logger.warn(`Login failed: User with email ${email} not found`);
       return res.status(400).json({ msg: "Invalid email or password" });
     }
 
-    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      logger.warn(`Login failed: Invalid password for email ${email}`);
       return res.status(400).json({ msg: "Invalid email or password" });
     }
 
-    // Generate JWT Token
     const token = jwt.sign(
       { userId: user._id, email: user.email },
       process.env.JWT_SECRET as string,
-      { expiresIn: "1h" }
+      { expiresIn: "2h" }
     );
-
-    logger.info(`Login successful for email: ${email}`);
 
     res.status(200).json({
       message: "Login successful",
       token,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { id: user._id, firstName: user.firstName, email: user.email },
     });
   } catch (error) {
-    logger.error(`Error during login for email ${req.body.email}: ${error}`);
+    res.status(500).json({ msg: "Internal server error", error });
+  }
+};
+
+export const validateToken = async (req: Request, res: Response) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ msg: "No token provided" });
+  }
+
+  try {
+    jwt.verify(token, process.env.JWT_SECRET as string);
+    res.status(200).json({ msg: "Token is valid" });
+  } catch (error) {
+    res.status(401).json({ msg: "Token is invalid or expired" });
+  }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  try {
+    res.status(200).json({ msg: "Logout successful" });
+  } catch (error) {
     res.status(500).json({ msg: "Internal server error", error });
   }
 };

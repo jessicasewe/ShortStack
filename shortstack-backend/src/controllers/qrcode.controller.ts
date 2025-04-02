@@ -3,7 +3,10 @@ import { generateQRCode } from "../services/qrcode.service";
 import QRCode from "../models/qr-code.model";
 import logger from "../utils/logger";
 
-export const createQRCodeHandler = async (req: Request, res: Response) => {
+export const createQRCodeHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { title, destinationUrl, qrCodeData } = req.body;
 
   logger.info("QR Code creation request received.");
@@ -11,13 +14,11 @@ export const createQRCodeHandler = async (req: Request, res: Response) => {
   // Validation
   if (!title || !destinationUrl) {
     logger.warn("QR Code creation failed: Missing title or destination URL.");
-    return res
-      .status(400)
-      .json({ error: "Title and destination URL are required" });
+    res.status(400).json({ error: "Title and destination URL are required" });
+    return;
   }
 
   try {
-    // Parse the qrCodeData to get the color and background color
     const { color, backgroundColor } = JSON.parse(qrCodeData);
 
     // Generate QR Code with the selected color and background color
@@ -28,13 +29,14 @@ export const createQRCodeHandler = async (req: Request, res: Response) => {
       backgroundColor
     );
 
-    // Save to database
+    // Save to database with the authenticated user's ID
     const qrCode = await QRCode.create({
       title,
       destinationUrl,
       qrCodeData: qrCodeDataUrl,
-      color, // Store the selected color
-      backgroundColor, // Store the selected background color
+      color,
+      backgroundColor,
+      userId: (req as any).user._id,
     });
 
     logger.info(`QR Code successfully created with ID: ${qrCode._id}`);
@@ -47,8 +49,8 @@ export const createQRCodeHandler = async (req: Request, res: Response) => {
 
 export const getAllQRCodesHandler = async (req: Request, res: Response) => {
   try {
-    logger.info("Fetching all QR codes from the database.");
-    const qrCodes = await QRCode.find({});
+    logger.info("Fetching all QR codes for the authenticated user.");
+    const qrCodes = await QRCode.find({ userId: (req as any).user._id });
     logger.info(`Fetched ${qrCodes.length} QR codes.`);
     res.status(200).json(qrCodes);
   } catch (error) {
@@ -66,11 +68,14 @@ export const deleteQRCodeHandler = async (
   logger.info(`QR Code deletion request received for ID: ${id}`);
 
   try {
-    // Check if QR code exists
-    const qrCode = await QRCode.findById(id);
+    // Check if QR code exists and belongs to the authenticated user
+    const qrCode = await QRCode.findOne({
+      _id: id,
+      userId: (req as any).user._id,
+    }); // Cast req to any to access user property
     if (!qrCode) {
-      logger.warn(`QR Code with ID: ${id} not found.`);
-      res.status(404).json({ error: "QR Code not found" });
+      logger.warn(`QR Code with ID: ${id} not found or unauthorized.`);
+      res.status(404).json({ error: "QR Code not found or unauthorized" });
       return;
     }
 

@@ -63,7 +63,7 @@ export const Navbar = () => {
     <header className="border-b z-10">
       <div className="container flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 mr-10">
-          <Image src={shortstack} alt="maton logo" width={200} />
+          <Image src={shortstack} alt="shortstack logo" width={200} />
         </Link>
         <nav className="space-x-10 md:flex relative mr-auto">
           {/* Products Dropdown */}
@@ -114,13 +114,11 @@ export const Navbar = () => {
             Extension
           </Link>
         </nav>
-        {/* Pricing Button */}
-        <Link href="/auth/pricing">
+        <Link href="/auth/login">
           <Button className="bg-white border-2 border-[#a24b33] text-[#a24b33] hover:bg-[#a24b33] hover:text-white md:inline-flex mr-4">
-            Pricing
+            LogIn
           </Button>
         </Link>
-        {/* Sign Up Button */}
         <Link href="/auth/signup">
           <Button className="bg-[#a24b33] text-white hover:bg-[#a24b33]/90 md:inline-flex">
             Sign Up

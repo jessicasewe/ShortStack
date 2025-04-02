@@ -22,6 +22,11 @@ const urlSchema = new Schema({
     required: true,
     unique: true,
   },
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

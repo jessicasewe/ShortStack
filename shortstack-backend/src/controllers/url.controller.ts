@@ -1,46 +1,61 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import Url from "../models/url.model";
+import Url from "../models/url.model"; // Assuming you have a Url model
 import logger from "../utils/logger";
 
-const urlMapping = new Map<
-  string,
-  { originalUrl: string; passwordHash?: string }
->();
-
+// Utility function to generate a short URL
 const generateShortUrl = (): string => {
   return Math.random().toString(36).substring(2, 8);
 };
 
-export const createShortUrl = async (req: Request, res: Response) => {
+/**
+ * Create a short URL.
+ */
+export const createShortUrl = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { originalUrl, password, title } = req.body;
+    const userId = (req as any).user?._id;
+
+    // if (!userId) {
+    //   res.status(401).json({ msg: "User not authenticated" });
+    //   return;
+    // }
+
     logger.info(`Request to create short URL for: ${originalUrl}`);
 
-    const existingUrl = await Url.findOne({ originalUrl });
+    // Check if the URL has already been shortened by the user
+    const existingUrl = await Url.findOne({ originalUrl, userId });
     if (existingUrl) {
       logger.info(`URL already shortened: ${originalUrl}`);
-      return res.status(200).json({
+      res.status(200).json({
         msg: "This URL is already shortened.",
         shortUrl: existingUrl.shortUrl,
       });
+      return;
     }
 
+    // Generate a short URL ID
     const shortUrlId = generateShortUrl();
-    const shortUrl = `http://localhost:5000/${shortUrlId}`;
-    let passwordHash: string | undefined = undefined;
+    const shortUrl = `http://shortstck.me/${shortUrlId}`;
 
+    // Hash the password if provided
+    let passwordHash: string | undefined = undefined;
     if (password) {
       logger.info("Password provided. Hashing password...");
       const salt = await bcrypt.genSalt(10);
       passwordHash = await bcrypt.hash(password, salt);
     }
 
+    // Create and save the new URL
     const newUrl = new Url({
       originalUrl,
       shortUrl,
       password: passwordHash,
       title,
+      userId,
     });
     await newUrl.save();
 
@@ -57,19 +72,27 @@ export const createShortUrl = async (req: Request, res: Response) => {
   }
 };
 
-export const redirectToOriginalUrl = async (req: Request, res: Response) => {
+/**
+ * Redirect to the original URL using the short URL.
+ */
+export const redirectToOriginalUrl = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const shortUrlId = req.params.shortUrl;
     const { password } = req.body;
     logger.info(`Request to redirect from short URL ID: ${shortUrlId}`);
 
+    // Find the URL data in the database
     const urlData = await Url.findOne({
       shortUrl: `http://localhost:5000/${shortUrlId}`,
     });
 
     if (!urlData) {
       logger.warn(`Short URL not found: ${shortUrlId}`);
-      return res.status(404).json({ msg: "Short URL not found" });
+      res.status(404).json({ msg: "Short URL not found" });
+      return;
     }
 
     // Check for password protection
@@ -77,16 +100,20 @@ export const redirectToOriginalUrl = async (req: Request, res: Response) => {
       logger.info("Password-protected URL. Verifying password...");
       if (!password) {
         logger.warn(`Password required for short URL: ${shortUrlId}`);
-        return res.status(400).json({ msg: "Password required" });
+        res.status(400).json({ msg: "Password required" });
+        return;
       }
 
+      // Compare the provided password with the hashed password
       const isMatch = await bcrypt.compare(password, urlData.password);
       if (!isMatch) {
         logger.warn(`Invalid password for short URL: ${shortUrlId}`);
-        return res.status(400).json({ msg: "Invalid password" });
+        res.status(400).json({ msg: "Invalid password" });
+        return;
       }
     }
 
+    // Redirect to the original URL
     logger.info(`Redirecting to original URL: ${urlData.originalUrl}`);
     res.redirect(urlData.originalUrl);
   } catch (error) {
@@ -97,13 +124,20 @@ export const redirectToOriginalUrl = async (req: Request, res: Response) => {
   }
 };
 
-export const getLinks = async (req: Request, res: Response) => {
+/**
+ * Get all links for the logged-in user.
+ */
+export const getLinks = async (req: Request, res: Response): Promise<void> => {
   try {
-    logger.info("Fetching all links from the database.");
+    const userId = (req as any).user?._id; // Extract user ID from the request
 
-    const links = await Url.find({});
+    if (!userId) {
+      res.status(401).json({ msg: "User not authenticated" });
+      return;
+    }
 
-    logger.info(`Fetched ${links.length} links:`, links);
+    // Fetch links for the logged-in user
+    const links = await Url.find({ userId });
 
     res.status(200).json({ links });
   } catch (error) {
@@ -112,16 +146,24 @@ export const getLinks = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteLinkById = async (req: Request, res: Response) => {
+/**
+ * Delete a link by ID.
+ */
+export const deleteLinkById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { id } = req.params;
     logger.info(`Request to delete URL with ID: ${id}`);
 
+    // Find and delete the URL
     const deletedUrl = await Url.findByIdAndDelete(id);
 
     if (!deletedUrl) {
       logger.warn(`URL not found with ID: ${id}`);
-      return res.status(404).json({ msg: "URL not found" });
+      res.status(404).json({ msg: "URL not found" });
+      return;
     }
 
     logger.info(`URL deleted with ID: ${id}`);
