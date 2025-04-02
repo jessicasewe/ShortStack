@@ -39,7 +39,7 @@ export const createShortUrl = async (
 
     // Generate a short URL ID
     const shortUrlId = generateShortUrl();
-    const shortUrl = `http://shortstck.me/${shortUrlId}`;
+    const shortUrl = `http://localhost:5000/${shortUrlId}`;
 
     // Hash the password if provided
     let passwordHash: string | undefined = undefined;
